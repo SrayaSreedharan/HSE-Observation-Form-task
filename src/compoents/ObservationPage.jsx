@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {Box, Container, Typography, Paper, Grid, TextField, MenuItem, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton,Tooltip, Snackbar, Alert, CircularProgress,Divider, Stack, FormControl, Select,Dialog, DialogTitle, DialogContent, DialogContentText,DialogActions, Fade, Chip,} from "@mui/material";
 import {Save as SaveIcon,Add as AddIcon,Edit as EditIcon,Delete as DeleteIcon,Check as CheckIcon,Close as CloseIcon,CalendarToday as CalendarIcon,LocationOn as LocationIcon,HealthAndSafety as SafetyIcon,ListAlt as ListAltIcon,FolderOpen as FolderIcon,Refresh as RefreshIcon,} from "@mui/icons-material";
@@ -192,30 +192,31 @@ export default function ObservationPage({ onGoSummary }) {
     writeSS({ docDate, project, projectDes, location, transId, rows, savedOk });
   }, [docDate, project, projectDes, location, transId, rows, savedOk]);
 
-  
-
-  const loadMaster = () => {
-    setLoading(true); setLoadError("");
-    const ft = (url, ms=10000) => {
-      const c = new AbortController();
-      const t = setTimeout(() => c.abort(), ms);
-      return fetch(url, { signal:c.signal }).finally(() => clearTimeout(t));
-    };
-    Promise.all([
-      ft(`${API}/GetProject`).then(r => r.json()),
-      ft(`${API}/GetEmployee`).then(r => r.json()),
-    ])
-    .then(([pd, ed]) => {
-      if (pd.Status === "Success") setProjects(dedupeById(safeParse(pd.ResultData, [])));
-      if (ed.Status === "Success") setEmployees(dedupeById(safeParse(ed.ResultData, [])));
-    })
-    .catch(err => {
-      const msg = err.name === "AbortError" ? "Request timed out." : `Load error: ${err.message}`;
-      setLoadError(msg); toast(msg, "error");
-    })
-    .finally(() => setLoading(false));
+  // Line 197 - loadMaster definition stays here
+const loadMaster = useCallback(() => {
+  setLoading(true); setLoadError("");
+  const ft = (url, ms = 10000) => {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), ms);
+    return fetch(url, { signal: c.signal }).finally(() => clearTimeout(t));
   };
-  useEffect(() => { loadMaster(); }, []);
+  Promise.all([
+    ft(`${API}/GetProject`).then(r => r.json()),
+    ft(`${API}/GetEmployee`).then(r => r.json()),
+  ])
+  .then(([pd, ed]) => {
+    if (pd.Status === "Success") setProjects(dedupeById(safeParse(pd.ResultData, [])));
+    if (ed.Status === "Success") setEmployees(dedupeById(safeParse(ed.ResultData, [])));
+  })
+  .catch(err => {
+    const msg = err.name === "AbortError" ? "Request timed out." : `Load error: ${err.message}`;
+    setLoadError(msg); toast(msg, "error");
+  })
+  .finally(() => setLoading(false));
+}, []);
+
+// useEffect AFTER loadMaster
+useEffect(() => { loadMaster(); }, [loadMaster]);
 
   const prevProjRef = useRef(null);
   useEffect(() => {
