@@ -70,8 +70,8 @@ const theme = createTheme({
   },
 });
 
-const API      = "http://103.120.178.195/HSEAPI/Ray";
-const SAVE_API = "http://103.120.178.195/Sang.Ray.Mob.Api/Ray/PostHSE";
+const API      = "/api";
+const SAVE_API = "/save/PostHSE";
 const today    = () => new Date().toISOString().split("T")[0];
 
 const RISK = {
