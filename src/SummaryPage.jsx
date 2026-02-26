@@ -94,7 +94,7 @@ function InfoChip({icon, label, value}) {
   );
 }
 
-export default function SummeryPage({ onGoForm }) {
+export default function SummaryPage({ onGoForm }) {
   const navigate = useNavigate();
   const goForm = () => { if (onGoForm) onGoForm(); else navigate("/"); };
 
