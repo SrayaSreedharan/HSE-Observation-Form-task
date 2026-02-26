@@ -37,7 +37,7 @@ const theme = createTheme({
   },
 });
 
-const API = "http://103.120.178.195/HSEAPI/Ray";
+const API = "/api";
 
 const RISK = {
   1:{label:"Low",    c:C.lc, bg:C.lb, bd:C.ld, dot:C.ldot},
