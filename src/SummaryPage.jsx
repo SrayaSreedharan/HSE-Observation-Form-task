@@ -114,7 +114,7 @@ export default function SummaryPage({ onGoForm }) {
     })
       .then(r => r.json())
       .then(d => {
-        console.group("📋 GetHSESummary");
+        console.group(" GetHSESummary");
         console.log("Status  :", d.Status);
         if (d.Status === "Success") {
           const list = JSON.parse(d.ResultData || "[]");
@@ -144,7 +144,7 @@ export default function SummaryPage({ onGoForm }) {
     fetch(`${API}/GetHSEDetails?iTransId=${transId}`)
       .then(r => r.json())
       .then(d => {
-        console.group(`🔍 GetHSEDetails — Trans #${transId}`);
+        console.group(`GetHSEDetails — Trans #${transId}`);
         console.log("Raw API response :", d);
 
         if (d.Status === "Success") {

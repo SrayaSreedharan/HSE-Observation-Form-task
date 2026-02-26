@@ -192,7 +192,7 @@ export default function ObservationPage({ onGoSummary }) {
     writeSS({ docDate, project, projectDes, location, transId, rows, savedOk });
   }, [docDate, project, projectDes, location, transId, rows, savedOk]);
 
-  useEffect(() => { loadMaster(); }, []);
+  
 
   const loadMaster = () => {
     setLoading(true); setLoadError("");
@@ -215,6 +215,7 @@ export default function ObservationPage({ onGoSummary }) {
     })
     .finally(() => setLoading(false));
   };
+  useEffect(() => { loadMaster(); }, []);
 
   const prevProjRef = useRef(null);
   useEffect(() => {
