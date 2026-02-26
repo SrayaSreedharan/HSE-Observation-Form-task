@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import SummeryPage from "./Summerypage";
 import ObservationPage from "./Observationpage";
+import SummeryPage from "./summerypage";
+
 
 function App() {
   return (
