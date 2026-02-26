@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ObservationPage from "../ObservationPage";
-import SummaryPage from "./SummaryPage";
+import SummaryPage from "../SummaryPage";
 
 function App() {
   return (
