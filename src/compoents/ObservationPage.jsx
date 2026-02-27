@@ -71,7 +71,7 @@ const theme = createTheme({
 });
 
 const API      = "/api";
-const SAVE_API = "/save/PostHSE";
+const SAVE_API = "/api/PostHSE";  
 const today    = () => new Date().toISOString().split("T")[0];
 
 const RISK = {

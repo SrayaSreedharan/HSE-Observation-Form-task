@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "http://103.120.178.195/HSEAPI/Ray/:path*" },
-    { "source": "/save/:path*", "destination": "http://103.120.178.195/Sang.Ray.Mob.Api/Ray/:path*" }
+    { "source": "/api/:path*", "destination": "http://103.120.178.195/HSEAPI/Ray/:path*" }
   ]
 }
