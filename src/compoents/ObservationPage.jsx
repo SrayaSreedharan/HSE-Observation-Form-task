@@ -1,19 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box, Container, Typography, Paper, Grid, TextField, MenuItem, Button,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  IconButton, Tooltip, Snackbar, Alert, CircularProgress, Divider, Stack,
-  FormControl, Select, Dialog, DialogTitle, DialogContent, DialogContentText,
-  DialogActions, Fade, Chip, useMediaQuery, Collapse,
-} from "@mui/material";
-import {
-  Save as SaveIcon, Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,
-  Check as CheckIcon, Close as CloseIcon, CalendarToday as CalendarIcon,
-  LocationOn as LocationIcon, HealthAndSafety as SafetyIcon,
-  ListAlt as ListAltIcon, FolderOpen as FolderIcon, Refresh as RefreshIcon,
-  ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon,
-} from "@mui/icons-material";
+import {Box, Container, Typography, Paper, Grid, TextField, MenuItem, Button,Table, TableBody, TableCell, TableContainer, TableHead, TableRow,IconButton, Tooltip, Snackbar, Alert, CircularProgress, Divider, Stack,FormControl, Select, Dialog, DialogTitle, DialogContent, DialogContentText,DialogActions, Fade, Chip, useMediaQuery, Collapse,} from "@mui/material";
+import {Save as SaveIcon, Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,Check as CheckIcon, Close as CloseIcon, CalendarToday as CalendarIcon,LocationOn as LocationIcon, HealthAndSafety as SafetyIcon,ListAlt as ListAltIcon, FolderOpen as FolderIcon, Refresh as RefreshIcon,ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon,} from "@mui/icons-material";
 import { createTheme, ThemeProvider, alpha, useTheme } from "@mui/material/styles";
 
 const C = {
@@ -179,11 +167,9 @@ function MobileRowCard({ row, idx, ed, editId, employees, empById, upd, done, ca
         </Stack>
       </Box>
 
-      {/* Expanded Content */}
       <Collapse in={expanded}>
         <Box sx={{ px:2, py:2, bgcolor:"#fff" }}>
           <Grid container spacing={1.5}>
-            {/* Observation */}
             <Grid item xs={12}>
               <FL label="Observation" />
               {ed ? (
@@ -197,7 +183,6 @@ function MobileRowCard({ row, idx, ed, editId, employees, empById, upd, done, ca
               )}
             </Grid>
 
-            {/* Risk Level */}
             <Grid item xs={12} sm={6}>
               <FL label="Risk Level" />
               {ed ? (
@@ -210,7 +195,6 @@ function MobileRowCard({ row, idx, ed, editId, employees, empById, upd, done, ca
               ) : <RiskBadge level={row.RiskLevel} />}
             </Grid>
 
-            {/* Target Date */}
             <Grid item xs={12} sm={6}>
               <FL label="Target Date" />
               {ed ? (
@@ -224,7 +208,6 @@ function MobileRowCard({ row, idx, ed, editId, employees, empById, upd, done, ca
               )}
             </Grid>
 
-            {/* Action Required */}
             <Grid item xs={12}>
               <FL label="Action Required" />
               {ed ? (
@@ -238,7 +221,6 @@ function MobileRowCard({ row, idx, ed, editId, employees, empById, upd, done, ca
               )}
             </Grid>
 
-            {/* Action By */}
             <Grid item xs={12}>
               <FL label="Action By" />
               {ed ? (
@@ -260,7 +242,6 @@ function MobileRowCard({ row, idx, ed, editId, employees, empById, upd, done, ca
             </Grid>
           </Grid>
 
-          {/* Action Buttons */}
           <Stack direction="row" spacing={1} sx={{ mt:2, pt:2, borderTop:`1px solid ${C.bdr}` }}>
             {ed ? (
               <>
@@ -455,7 +436,7 @@ export default function ObservationPage({ onGoSummary }) {
         const savedRows  = rows.map(r => ({ ...r, _unsaved:false }));
         setTransId(newTransId); setRows(savedRows); setSavedOk(true);
         writeSS({ docDate, project, projectDes, location, transId:newTransId, rows:savedRows, savedOk:true });
-        toast(`✅ Saved! Trans #${newTransId}`);
+        toast(`Saved! Trans #${newTransId}`);
       } else {
         toast(result.MessageDescription || "Operation failed.", "error");
       }
