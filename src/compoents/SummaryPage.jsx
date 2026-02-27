@@ -1,12 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {Box, Container, Typography, Paper, Table, TableBody, TableCell,TableContainer, TableHead, TableRow, IconButton,CircularProgress, Stack, Dialog, DialogActions,Button, Chip, Grid, Snackbar, Alert, Divider,} from "@mui/material";
-import {HealthAndSafety as SafetyIcon,Visibility as ViewIcon,ListAlt as ListAltIcon,ArrowBack as ArrowBackIcon,Refresh as RefreshIcon,CalendarToday as CalendarIcon,LocationOn as LocationIcon,FolderOpen as FolderIcon,Person as PersonIcon,Assignment as AssignIcon,} from "@mui/icons-material";
-import { createTheme, ThemeProvider, alpha } from "@mui/material/styles";
+import {
+  Box, Container, Typography, Paper, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, IconButton, CircularProgress,
+  Stack, Dialog, DialogActions, Button, Chip, Grid, Snackbar, Alert,
+  Divider, useMediaQuery, Collapse,
+} from "@mui/material";
+import {
+  HealthAndSafety as SafetyIcon, Visibility as ViewIcon,
+  ListAlt as ListAltIcon, ArrowBack as ArrowBackIcon, Refresh as RefreshIcon,
+  CalendarToday as CalendarIcon, LocationOn as LocationIcon,
+  FolderOpen as FolderIcon, Person as PersonIcon, Assignment as AssignIcon,
+  ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon,
+} from "@mui/icons-material";
+import { createTheme, ThemeProvider, alpha, useTheme } from "@mui/material/styles";
 
 const C = {
   p:"#43A047", s:"#81C784", bg:"#F9FBF9", txt:"#2E7D32", pDk:"#388E3C", pLt:"#E8F5E9",
-  bdr:"#C8E6C9", bdrM:"#A5D6A7", mute:"#66A96A", surf:"#FFFFFF", sAlt:"#F9FBF9",
+  pXlt:"#F1F8F1", bdr:"#C8E6C9", bdrM:"#A5D6A7", mute:"#66A96A", surf:"#FFFFFF", sAlt:"#F9FBF9",
   shad:"rgba(67,160,71,0.10)",
   lc:"#2E7D32", lb:"#E8F5E9", ld:"#A5D6A7", ldot:"#4CAF50",
   mc:"#E65100", mb:"#FFF3E0", md:"#FFCC80",
@@ -53,18 +64,18 @@ function SectionCard({icon, title, children, action}) {
   return (
     <Paper elevation={0} sx={{mb:3, overflow:"hidden", border:`1.5px solid ${C.bdr}`, boxShadow:`0 2px 14px ${C.shad}`}}>
       <GreenBar/>
-      <Box sx={{px:3, py:2, background:C.pLt, borderBottom:`1.5px solid ${C.bdrM}`,
+      <Box sx={{px:{xs:2,sm:3}, py:2, background:C.pLt, borderBottom:`1.5px solid ${C.bdrM}`,
         display:"flex", alignItems:"center", justifyContent:"space-between"}}>
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <Box sx={{width:34, height:34, borderRadius:"8px", bgcolor:alpha(C.p,.15),
-            border:`1.5px solid ${C.bdrM}`, display:"flex", alignItems:"center", justifyContent:"center"}}>
+            border:`1.5px solid ${C.bdrM}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0}}>
             {icon}
           </Box>
-          <Typography sx={{fontWeight:800, fontSize:15, color:C.txt}}>{title}</Typography>
+          <Typography sx={{fontWeight:800, fontSize:{xs:13,sm:15}, color:C.txt}}>{title}</Typography>
         </Stack>
         {action}
       </Box>
-      <Box sx={{p:3, bgcolor:"#FFFFFF"}}>{children}</Box>
+      <Box sx={{p:{xs:2,sm:3}, bgcolor:"#FFFFFF"}}>{children}</Box>
     </Paper>
   );
 }
@@ -94,8 +105,129 @@ function InfoChip({icon, label, value}) {
   );
 }
 
+/* ── Mobile Summary Card ── */
+function MobileSummaryCard({ row, idx, onView }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <Paper elevation={0} sx={{
+      mb:1.5, border:`1.5px solid ${idx === 0 ? C.p : C.bdr}`,
+      borderRadius:"10px", overflow:"hidden",
+      boxShadow: idx === 0 ? `0 2px 12px ${alpha(C.p,.15)}` : `0 1px 4px ${C.shad}`,
+    }}>
+      {/* Header Row */}
+      <Box sx={{
+        px:2, py:1.5,
+        bgcolor: idx === 0 ? alpha(C.p,.06) : idx % 2 === 0 ? "#fff" : C.sAlt,
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+        borderBottom: expanded ? `1px solid ${C.bdr}` : "none",
+      }}>
+        <Stack direction="row" alignItems="center" sx={{flex:1, minWidth:0, gap:1}}>
+          {idx === 0 && (
+            <Chip label="NEW" size="small" sx={{
+              height:17, fontSize:9, fontWeight:800,
+              bgcolor:C.p, color:"#fff", borderRadius:"4px", flexShrink:0,
+            }}/>
+          )}
+          <Box sx={{minWidth:0, flex:1}}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography fontWeight={800} fontSize={13.5} color={C.p}>#{row.iTransId}</Typography>
+              <Typography fontWeight={600} fontSize={12} color={C.mute} sx={{overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>
+                {row.sDocNo}
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={.5} sx={{mt:.3}}>
+              <FolderIcon sx={{fontSize:12, color:C.mute}}/>
+              <Typography fontSize={12} color={C.txt} fontWeight={600} sx={{overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>
+                {row.Project}
+              </Typography>
+            </Stack>
+          </Box>
+        </Stack>
+        <Stack direction="row" alignItems="center" spacing={.5} sx={{flexShrink:0, ml:1}}>
+          <IconButton size="small" onClick={() => onView(row.iTransId)} sx={{
+            color:C.p, bgcolor:C.pLt, border:`1.5px solid ${C.bdrM}`,
+            borderRadius:"7px", width:32, height:32,
+          }}>
+            <ViewIcon sx={{fontSize:15}}/>
+          </IconButton>
+          <IconButton size="small" onClick={() => setExpanded(v => !v)} sx={{color:C.mute}}>
+            {expanded ? <ExpandLessIcon fontSize="small"/> : <ExpandMoreIcon fontSize="small"/>}
+          </IconButton>
+        </Stack>
+      </Box>
+
+      {/* Expanded Details */}
+      <Collapse in={expanded}>
+        <Box sx={{px:2, py:1.5, bgcolor:"#fff"}}>
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <Typography fontSize={10} fontWeight={700} color={C.mute} textTransform="uppercase" letterSpacing=".07em">Date</Typography>
+              <Stack direction="row" alignItems="center" spacing={.5} sx={{mt:.3}}>
+                <CalendarIcon sx={{fontSize:13, color:C.mute}}/>
+                <Typography fontSize={13} color={C.txt}>{row.Date}</Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography fontSize={10} fontWeight={700} color={C.mute} textTransform="uppercase" letterSpacing=".07em">Location</Typography>
+              <Stack direction="row" alignItems="center" spacing={.5} sx={{mt:.3}}>
+                <LocationIcon sx={{fontSize:13, color:C.mute}}/>
+                <Typography fontSize={13} color={C.txt}>{row.sLocation}</Typography>
+              </Stack>
+            </Grid>
+          </Grid>
+        </Box>
+      </Collapse>
+    </Paper>
+  );
+}
+
+/* ── Mobile Detail Observation Card ── */
+function MobileObsCard({ b, i }) {
+  return (
+    <Paper elevation={0} sx={{mb:1.5, border:`1.5px solid ${C.bdr}`, borderRadius:"10px", overflow:"hidden"}}>
+      <Box sx={{px:2, py:1.5, bgcolor: i % 2 === 0 ? "#fff" : C.sAlt}}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{mb:1}}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{width:22, height:22, borderRadius:"5px", bgcolor:C.pLt, border:`1px solid ${C.bdrM}`,
+              display:"flex", alignItems:"center", justifyContent:"center"}}>
+              <Typography fontSize={10} fontWeight={800} color={C.txt}>{i+1}</Typography>
+            </Box>
+            <RiskBadge level={b.iRiskLevel}/>
+          </Stack>
+          {b.TargetDate && (
+            <Stack direction="row" alignItems="center" spacing={.4}>
+              <CalendarIcon sx={{fontSize:12, color:C.mute}}/>
+              <Typography fontSize={11.5} color={C.mute}>{b.TargetDate}</Typography>
+            </Stack>
+          )}
+        </Stack>
+
+        <Typography fontSize={10} fontWeight={700} color={C.mute} textTransform="uppercase" letterSpacing=".07em">Observation</Typography>
+        <Typography fontSize={13.5} color={C.txt} sx={{mt:.3, mb:1}}>{b.sObservation || "—"}</Typography>
+
+        {b.sActionReq && (
+          <>
+            <Typography fontSize={10} fontWeight={700} color={C.mute} textTransform="uppercase" letterSpacing=".07em">Action Required</Typography>
+            <Typography fontSize={13} color={C.txt} sx={{mt:.3, mb:1}}>{b.sActionReq}</Typography>
+          </>
+        )}
+
+        {b.iActionBy && (
+          <Stack direction="row" alignItems="center" spacing={.5}>
+            <PersonIcon sx={{fontSize:14, color:C.mute}}/>
+            <Typography fontSize={13} color={C.txt} fontWeight={600}>{b.iActionBy}</Typography>
+          </Stack>
+        )}
+      </Box>
+    </Paper>
+  );
+}
+
 export default function SummaryPage({ onGoForm }) {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const muiTheme  = useTheme();
+  const isMobile  = useMediaQuery(muiTheme.breakpoints.down("md"));
+
   const goForm = () => { if (onGoForm) onGoForm(); else navigate("/"); };
 
   const [summaries,     setSummaries]     = useState([]);
@@ -106,37 +238,30 @@ export default function SummaryPage({ onGoForm }) {
   const [lastFetched,   setLastFetched]   = useState(null);
   const [snack, setSnack] = useState({open:false, msg:"", sev:"error"});
   const toast = (msg, sev="error") => setSnack({open:true, msg, sev});
+
   const fetchAll = useCallback(() => {
     setLoading(true);
     fetch(`${API}/GetHSESummary?UserId=0`, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
+      cache:"no-store",
+      headers:{"Cache-Control":"no-cache", "Pragma":"no-cache"},
     })
       .then(r => r.json())
       .then(d => {
-        console.group(" GetHSESummary");
-        console.log("Status  :", d.Status);
         if (d.Status === "Success") {
           const list = JSON.parse(d.ResultData || "[]");
           list.sort((a, b) => Number(b.iTransId) - Number(a.iTransId));
-          console.log("Records :", list.length, "— Latest TransId:", list[0]?.iTransId);
-          console.groupEnd();
           setSummaries(list);
           setLastFetched(new Date().toLocaleTimeString());
         } else {
-          console.warn("Non-success:", d);
-          console.groupEnd();
           toast(d.MessageDescription || "Failed to load summary.");
         }
       })
-      .catch(err => {
-        console.error("Summary fetch error:", err);
-        toast("Network error loading summary.");
-      })
+      .catch(() => toast("Network error loading summary."))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
   const openDetail = (transId) => {
     setSelectedTrans(transId);
     setDetailLoading(true);
@@ -144,107 +269,114 @@ export default function SummaryPage({ onGoForm }) {
     fetch(`${API}/GetHSEDetails?iTransId=${transId}`)
       .then(r => r.json())
       .then(d => {
-        console.group(`GetHSEDetails — Trans #${transId}`);
-        console.log("Raw API response :", d);
-
         if (d.Status === "Success") {
           let parsed = {};
           try {
             const rd = d.ResultData;
             parsed = typeof rd === "string" ? JSON.parse(rd) : rd;
-          } catch (e) {
-            console.error("ResultData parse error:", e);
-          }
-
-          console.log("Parsed Header :", parsed.Header);
-          console.log("Parsed Body   :", parsed.Body);
-          console.groupEnd();
-
+          } catch {}
           setDetail({
             header: parsed.Header?.[0] || {},
             body:   Array.isArray(parsed.Body) ? parsed.Body : [],
           });
         } else {
-          console.warn("API returned non-success:", d);
-          console.groupEnd();
           toast("Failed to load details.");
         }
       })
-      .catch(err => {
-        console.error("Detail fetch error:", err);
-        toast("Network error loading details.");
-      })
+      .catch(() => toast("Network error loading details."))
       .finally(() => setDetailLoading(false));
   };
 
   const closeDetail = () => { setSelectedTrans(null); setDetail(null); };
+
   return (
     <ThemeProvider theme={theme}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');`}</style>
       <Box sx={{minHeight:"100vh", bgcolor:C.bg}}>
+
+        {/* ── Top Nav ── */}
         <Box sx={{background:`linear-gradient(135deg,${C.p} 0%,${C.pDk} 100%)`,
           boxShadow:`0 3px 16px ${C.shad}`, position:"sticky", top:0, zIndex:300}}>
           <GreenBar h={3}/>
           <Container maxWidth="xl">
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{height:62}}>
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <Box sx={{width:42, height:42, borderRadius:"11px", bgcolor:alpha("#fff",.2),
-                  border:`1.5px solid ${alpha("#fff",.4)}`, display:"flex", alignItems:"center", justifyContent:"center"}}>
-                  <SafetyIcon sx={{color:"#fff", fontSize:24}}/>
+            <Stack direction="row" alignItems="center" justifyContent="space-between"
+              sx={{height:{xs:56,sm:62}}}>
+              <Stack direction="row" alignItems="center" spacing={1.2}>
+                <Box sx={{width:{xs:36,sm:42}, height:{xs:36,sm:42}, borderRadius:"11px",
+                  bgcolor:alpha("#fff",.2), border:`1.5px solid ${alpha("#fff",.4)}`,
+                  display:"flex", alignItems:"center", justifyContent:"center"}}>
+                  <SafetyIcon sx={{color:"#fff", fontSize:{xs:20,sm:24}}}/>
                 </Box>
                 <Box>
-                  <Typography sx={{fontWeight:900, color:"#fff", fontSize:15.5, lineHeight:1.2}}>HSE Observation System</Typography>
-                  <Typography sx={{fontSize:9.5, color:alpha("#fff",.8), letterSpacing:".12em", fontWeight:700}}>HEALTH · SAFETY · ENVIRONMENT</Typography>
+                  <Typography sx={{fontWeight:900, color:"#fff", fontSize:{xs:13,sm:15.5}, lineHeight:1.2}}>
+                    HSE Observation System
+                  </Typography>
+                  {!isMobile && (
+                    <Typography sx={{fontSize:9.5, color:alpha("#fff",.8), letterSpacing:".12em", fontWeight:700}}>
+                      HEALTH · SAFETY · ENVIRONMENT
+                    </Typography>
+                  )}
                 </Box>
               </Stack>
               <Stack direction="row" spacing={.5} alignItems="center">
-                <Box sx={{px:2.2, py:.85, bgcolor:alpha("#fff",.2), border:`1.5px solid ${alpha("#fff",.45)}`,
-                  borderRadius:"8px", display:"flex", alignItems:"center", gap:.8}}>
-                  <Box sx={{width:7, height:7, borderRadius:"50%", bgcolor:"#fff"}}/>
-                  <Typography sx={{color:"#fff", fontWeight:800, fontSize:13.5}}>Summary</Typography>
-                </Box>
-                <Button onClick={goForm} sx={{color:alpha("#fff",.8), fontWeight:700, fontSize:13.5,
-                  border:"1.5px solid transparent", borderRadius:"8px",
-                  "&:hover":{bgcolor:alpha("#fff",.12), borderColor:alpha("#fff",.35), color:"#fff"}}}>
-                  Observation Form
+                {!isMobile && (
+                  <Box sx={{px:2.2, py:.85, bgcolor:alpha("#fff",.2), border:`1.5px solid ${alpha("#fff",.45)}`,
+                    borderRadius:"8px", display:"flex", alignItems:"center", gap:.8}}>
+                    <Box sx={{width:7, height:7, borderRadius:"50%", bgcolor:"#fff"}}/>
+                    <Typography sx={{color:"#fff", fontWeight:800, fontSize:13.5}}>Summary</Typography>
+                  </Box>
+                )}
+                <Button onClick={goForm} size={isMobile ? "small" : "medium"}
+                  sx={{color:alpha("#fff",.9), fontWeight:700, fontSize:{xs:12,sm:13.5},
+                    border:"1.5px solid transparent", borderRadius:"8px", px:{xs:1.5,sm:2},
+                    "&:hover":{bgcolor:alpha("#fff",.12), borderColor:alpha("#fff",.35), color:"#fff"}}}>
+                  {isMobile ? "Form" : "Observation Form"}
                 </Button>
               </Stack>
             </Stack>
           </Container>
         </Box>
 
-        <Container maxWidth="xl" sx={{py:3.5}}>
+        <Container maxWidth="xl" sx={{py:{xs:2,sm:3.5}, px:{xs:1.5,sm:3}}}>
+
+          {/* ── Banner ── */}
           <Paper elevation={0} sx={{mb:3, overflow:"hidden", border:`1.5px solid ${C.bdr}`, boxShadow:`0 2px 12px ${C.shad}`}}>
             <GreenBar/>
-            <Box sx={{p:"20px 28px", background:"#fff", display:"flex",
-              justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:2}}>
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Box sx={{width:52, height:52, borderRadius:"13px", bgcolor:C.pLt,
-                  border:`1.5px solid ${C.bdrM}`, display:"flex", alignItems:"center", justifyContent:"center"}}>
-                  <ListAltIcon sx={{color:C.p, fontSize:28}}/>
+            <Box sx={{p:{xs:"14px 16px",sm:"20px 28px"}, background:"#fff", display:"flex",
+              justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:1.5}}>
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <Box sx={{width:{xs:40,sm:52}, height:{xs:40,sm:52}, borderRadius:"13px", bgcolor:C.pLt,
+                  border:`1.5px solid ${C.bdrM}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0}}>
+                  <ListAltIcon sx={{color:C.p, fontSize:{xs:22,sm:28}}}/>
                 </Box>
                 <Box>
-                  <Typography sx={{fontWeight:900, fontSize:19, color:C.txt, lineHeight:1.2}}>Observations Overview</Typography>
-                  <Typography sx={{fontSize:13, color:C.mute, mt:.4}}>
+                  <Typography sx={{fontWeight:900, fontSize:{xs:15,sm:19}, color:C.txt, lineHeight:1.2}}>
+                    Observations Overview
+                  </Typography>
+                  <Typography sx={{fontSize:{xs:11.5,sm:13}, color:C.mute, mt:.3}}>
                     {loading ? "Syncing with server…" : `${summaries.length} records · Last updated: ${lastFetched}`}
                   </Typography>
                 </Box>
               </Stack>
-              <Stack direction="row" spacing={1.5}>
+              <Stack direction="row" spacing={1} alignItems="center">
                 <IconButton onClick={fetchAll} disabled={loading}
                   sx={{border:`1.5px solid ${C.bdrM}`, color:C.p, borderRadius:"8px",
+                    width:{xs:36,sm:40}, height:{xs:36,sm:40},
                     "&:hover":{bgcolor:C.pLt}}}>
-                  {loading ? <CircularProgress size={20} sx={{color:C.p}}/> : <RefreshIcon/>}
+                  {loading ? <CircularProgress size={18} sx={{color:C.p}}/> : <RefreshIcon fontSize="small"/>}
                 </IconButton>
-                <Button variant="contained" onClick={goForm} startIcon={<ArrowBackIcon/>}
+                <Button variant="contained" onClick={goForm} size={isMobile ? "small" : "medium"}
+                  startIcon={<ArrowBackIcon/>}
                   sx={{background:`linear-gradient(135deg,${C.s} 0%,${C.p} 100%)`,
                     boxShadow:`0 4px 12px ${alpha(C.p,.3)}`,
                     "&:hover":{background:`linear-gradient(135deg,${C.p} 0%,${C.pDk} 100%)`}}}>
-                  New Observation
+                  {isMobile ? "New" : "New Observation"}
                 </Button>
               </Stack>
             </Box>
           </Paper>
+
+          {/* ── Records ── */}
           <SectionCard icon={<ListAltIcon sx={{color:C.p, fontSize:19}}/>} title="Record History">
             {loading ? (
               <Box sx={{textAlign:"center", py:10}}>
@@ -255,7 +387,15 @@ export default function SummaryPage({ onGoForm }) {
               <Box sx={{textAlign:"center", py:10}}>
                 <Typography fontSize={14} color={C.mute} fontWeight={600}>No records found.</Typography>
               </Box>
+            ) : isMobile ? (
+              /* MOBILE: Card list */
+              <Box>
+                {summaries.map((row, idx) => (
+                  <MobileSummaryCard key={row.iTransId} row={row} idx={idx} onView={openDetail}/>
+                ))}
+              </Box>
             ) : (
+              /* DESKTOP: Table */
               <TableContainer sx={{borderRadius:"10px", border:`1.5px solid ${C.bdr}`, overflow:"hidden"}}>
                 <Table size="small">
                   <TableHead>
@@ -322,11 +462,14 @@ export default function SummaryPage({ onGoForm }) {
             )}
           </SectionCard>
         </Container>
-        <Dialog open={!!selectedTrans} onClose={closeDetail} maxWidth="md" fullWidth
-          PaperProps={{sx:{overflow:"hidden", border:`1.5px solid ${C.bdr}`}}}>
-          <GreenBar/>
 
-          <Box sx={{px:3, py:2, background:C.pLt, borderBottom:`1.5px solid ${C.bdrM}`,
+        {/* ── Detail Dialog ── */}
+        <Dialog open={!!selectedTrans} onClose={closeDetail}
+          maxWidth="md" fullWidth fullScreen={isMobile}
+          PaperProps={{sx:{overflow:"hidden", border:`1.5px solid ${C.bdr}`,
+            mx:{xs:0,sm:"auto"}, borderRadius:{xs:0,sm:"12px"}}}}>
+          <GreenBar/>
+          <Box sx={{px:{xs:2,sm:3}, py:2, background:C.pLt, borderBottom:`1.5px solid ${C.bdrM}`,
             display:"flex", alignItems:"center", justifyContent:"space-between"}}>
             <Stack direction="row" alignItems="center" spacing={1.5}>
               <Box sx={{width:34, height:34, borderRadius:"8px", bgcolor:alpha(C.p,.15),
@@ -334,19 +477,26 @@ export default function SummaryPage({ onGoForm }) {
                 <AssignIcon sx={{color:C.p, fontSize:19}}/>
               </Box>
               <Box>
-                <Typography fontWeight={800} fontSize={15} color={C.txt}>Observation Details</Typography>
+                <Typography fontWeight={800} fontSize={{xs:13,sm:15}} color={C.txt}>Observation Details</Typography>
                 {detail?.header?.sDocNo && (
                   <Typography fontSize={12} color={C.mute}>Doc: {detail.header.sDocNo}</Typography>
                 )}
               </Box>
             </Stack>
-            {selectedTrans && (
-              <Chip label={`Trans #${selectedTrans}`}
-                sx={{bgcolor:C.pLt, color:C.txt, fontWeight:700, border:`1px solid ${C.bdrM}`}}/>
-            )}
+            <Stack direction="row" alignItems="center" spacing={1}>
+              {selectedTrans && (
+                <Chip label={`Trans #${selectedTrans}`} size="small"
+                  sx={{bgcolor:C.pLt, color:C.txt, fontWeight:700, border:`1px solid ${C.bdrM}`}}/>
+              )}
+              {isMobile && (
+                <IconButton size="small" onClick={closeDetail} sx={{color:C.mute}}>
+                  ✕
+                </IconButton>
+              )}
+            </Stack>
           </Box>
 
-          <Box sx={{p:3, bgcolor:"#fff", maxHeight:"70vh", overflowY:"auto"}}>
+          <Box sx={{p:{xs:2,sm:3}, bgcolor:"#fff", flex:1, overflowY:"auto", maxHeight:{xs:"100%",sm:"70vh"}}}>
             {detailLoading ? (
               <Box sx={{textAlign:"center", py:6}}>
                 <CircularProgress sx={{color:C.p}} size={40}/>
@@ -354,25 +504,24 @@ export default function SummaryPage({ onGoForm }) {
               </Box>
             ) : detail ? (
               <>
-              
+                {/* Header Info */}
                 <Grid container spacing={1.5} sx={{mb:3}}>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <InfoChip icon={<AssignIcon sx={{fontSize:17}}/>} label="Doc No"   value={detail.header.sDocNo}/>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <InfoChip icon={<AssignIcon sx={{fontSize:17}}/>} label="Doc No" value={detail.header.sDocNo}/>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <InfoChip icon={<CalendarIcon sx={{fontSize:17}}/>} label="Date"   value={detail.header.Date}/>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <InfoChip icon={<CalendarIcon sx={{fontSize:17}}/>} label="Date" value={detail.header.Date}/>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <InfoChip icon={<FolderIcon sx={{fontSize:17}}/>} label="Project"  value={detail.header.Project}/>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <InfoChip icon={<FolderIcon sx={{fontSize:17}}/>} label="Project" value={detail.header.Project}/>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={6} sm={6} md={3}>
                     <InfoChip icon={<LocationIcon sx={{fontSize:17}}/>} label="Location" value={detail.header.sLocation}/>
                   </Grid>
                 </Grid>
 
                 <Divider sx={{mb:2.5, borderColor:C.bdr}}/>
 
-               
                 <Typography sx={{fontWeight:800, fontSize:13.5, color:C.txt, mb:1.5,
                   textTransform:"uppercase", letterSpacing:".06em"}}>
                   Observations ({detail.body.length})
@@ -380,7 +529,15 @@ export default function SummaryPage({ onGoForm }) {
 
                 {detail.body.length === 0 ? (
                   <Typography fontSize={13} color={C.mute} fontStyle="italic">No observation rows found.</Typography>
+                ) : isMobile ? (
+                  /* MOBILE: Obs cards */
+                  <Box>
+                    {detail.body.map((b, i) => (
+                      <MobileObsCard key={b.iTransDtId || i} b={b} i={i}/>
+                    ))}
+                  </Box>
                 ) : (
+                  /* DESKTOP: Table */
                   <TableContainer sx={{borderRadius:"10px", border:`1.5px solid ${C.bdr}`, overflow:"hidden"}}>
                     <Table size="small">
                       <TableHead>
@@ -400,14 +557,12 @@ export default function SummaryPage({ onGoForm }) {
                             "&:hover td":{bgcolor:alpha(C.p,.025)},
                           }}>
                             <TableCell>
-                              <Typography fontSize={12} fontWeight={700} color={C.mute}>{i + 1}</Typography>
+                              <Typography fontSize={12} fontWeight={700} color={C.mute}>{i+1}</Typography>
                             </TableCell>
                             <TableCell sx={{minWidth:180}}>
                               <Typography fontSize={13.5} color={C.txt}>{b.sObservation || "—"}</Typography>
                             </TableCell>
-                            <TableCell>
-                              <RiskBadge level={b.iRiskLevel}/>
-                            </TableCell>
+                            <TableCell><RiskBadge level={b.iRiskLevel}/></TableCell>
                             <TableCell sx={{minWidth:160}}>
                               <Typography fontSize={13.5} color={b.sActionReq ? C.txt : C.mute}
                                 fontStyle={b.sActionReq ? "normal" : "italic"}>
@@ -417,9 +572,7 @@ export default function SummaryPage({ onGoForm }) {
                             <TableCell>
                               <Stack direction="row" alignItems="center" spacing={.6}>
                                 <PersonIcon sx={{fontSize:14, color:C.mute}}/>
-                                <Typography fontSize={13} color={C.txt} fontWeight={600}>
-                                  {b.iActionBy || "—"}
-                                </Typography>
+                                <Typography fontSize={13} color={C.txt} fontWeight={600}>{b.iActionBy || "—"}</Typography>
                               </Stack>
                             </TableCell>
                             <TableCell>
@@ -438,9 +591,8 @@ export default function SummaryPage({ onGoForm }) {
             ) : null}
           </Box>
 
-          {/* Dialog Footer */}
-          <DialogActions sx={{px:3, py:2, bgcolor:C.pXlt, borderTop:`1px solid ${C.bdr}`}}>
-            <Button onClick={closeDetail} variant="outlined"
+          <DialogActions sx={{px:{xs:2,sm:3}, py:2, bgcolor:C.pXlt, borderTop:`1px solid ${C.bdr}`}}>
+            <Button onClick={closeDetail} variant="outlined" fullWidth={isMobile}
               sx={{borderColor:C.bdrM, color:C.p, minWidth:100,
                 "&:hover":{borderColor:C.p, bgcolor:C.pLt}}}>
               Close
@@ -448,12 +600,12 @@ export default function SummaryPage({ onGoForm }) {
           </DialogActions>
         </Dialog>
 
-        {/* ═══ SNACKBAR ═══ */}
+        {/* ── Snackbar ── */}
         <Snackbar open={snack.open} autoHideDuration={3500}
           onClose={() => setSnack(s => ({...s, open:false}))}
-          anchorOrigin={{vertical:"bottom", horizontal:"right"}}>
+          anchorOrigin={{vertical:"bottom", horizontal:isMobile ? "center" : "right"}}>
           <Alert severity={snack.sev} variant="filled"
-            sx={{fontWeight:700, borderRadius:"10px", fontSize:13.5}}>
+            sx={{fontWeight:700, borderRadius:"10px", fontSize:13.5, width:{xs:"90vw",sm:"auto"}}}>
             {snack.msg}
           </Alert>
         </Snackbar>
